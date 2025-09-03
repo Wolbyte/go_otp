@@ -47,3 +47,8 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		"created":     user.CreatedAt,
 	})
 }
+
+func (h *UserHandler) GetProfile(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	c.JSON(http.StatusAccepted, gin.H{"message": "private data", "user_id": userID})
+}

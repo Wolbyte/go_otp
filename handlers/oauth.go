@@ -93,10 +93,18 @@ func (h *OAuthHandler) OAuth(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-		} else {
-			fmt.Println("Welcome back!", user.PhoneNumber)
 		}
 
-		c.JSON(http.StatusAccepted, gin.H{"message": "success!"})
+		token, err := utils.GenerateJWT(user.ID)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("token generation failed: %s", err)})
+			return
+		}
+
+		c.JSON(http.StatusAccepted, gin.H{
+			"message": "success!",
+			"token":   token,
+		})
 	}
 }
