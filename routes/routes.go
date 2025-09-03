@@ -1,16 +1,19 @@
 package routes
 
 import (
-	"net/http"
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
+	"github.com/wolbyte/go_otp/handlers"
 )
 
-func Register(router *gin.Engine) {
+func Register(router *gin.Engine, db *gorm.DB) {
 	apiV1 := router.Group("/api/v1")
 	{
-		apiV1.GET("/users/:id", func(c *gin.Context) {
-			c.JSON(http.StatusAccepted, nil)
-		})
+		userHandler := handlers.NewUserHandler(db)
+		oauthHandler := handlers.NewOAuthHandler(db)
+
+		apiV1.GET("/users/:id", userHandler.GetUser)
+		apiV1.POST("/users/oauth", oauthHandler.OAuth)
 	}
 }

@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16.10-alpine
+    container_name: go_otp_db
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - backend
+    ports:
+      - 5432:5432
+
+  backend:
+    container_name: "go_otp_backend"
+    restart: unless-stopped
+    env_file: .env
+    build:
+      context: .
+    depends_on:
+      - db
+    networks:
+      - backend
+    ports:
+      - 8080:8080
+
+volumes:
+  db-data:
+
+
+networks:
+  backend:
