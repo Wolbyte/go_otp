@@ -36,8 +36,8 @@ limiting can be reused across multiple endpoints.
 
 ## Prerequisites
 
--   Go 1.21+\
--   PostgreSQL 16+\
+-   Go 1.21+
+-   PostgreSQL 16+
 -   Docker (optional, if you prefer running with containers)
 
 ------------------------------------------------------------------------
