@@ -32,6 +32,15 @@ func NewUserHandler(db *gorm.DB) *UserHandler {
 	return &UserHandler{DB: db}
 }
 
+// @Summary Get user by ID
+// @Description Returns a single user by using it's id as a path argument
+// @Tags Users
+// @Produce json
+// @Param id path int true "ID of the user"
+// @Success 200 {object} models.User
+// @Failure 404 {object} utils.HTTPError
+// @Failure 500 {object} utils.HTTPError
+// @Router /users/{id} [get]
 func (h *UserHandler) GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
@@ -54,6 +63,20 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// @Summary	Get a list of users
+// @Description Returns a list of users with pagination and filtering capabilities
+// @Tags Users
+// @Produce json
+// @Param page         query int    false "Sets the current page"
+// @Param page_size    query int    false "Elements per page"
+// @Param phone_number query string false "Search for user(s) with phone number"
+// @Param date_from    query string false "Set the starting registration date (yyyy-mm-dd)" example(2025-09-05)
+// @Param date_to      query string false "Set the ending registration date (yyyy-mm-dd)" example(2025-09-06)
+// @Param tz           query string false "Parse dates in the desired timezone" example(Asia/Tehran)
+// @Success 200 {object} GetUsersResponse
+// @Failure 400 {object} utils.HTTPError
+// @Failure 500 {object} utils.HTTPError
+// @Router /users [get]
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 
@@ -121,6 +144,14 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	})
 }
 
+// @Summary	Get private user data
+// @Description Returns a user's id with a message using a JWT token
+// @Tags Users
+// @Produce json
+// @Param Authorization header string true "Bearer Token"
+// @Success 200 {object} GetProfileResponse
+// @Failure 401 {object} utils.HTTPError
+// @Router /profile/info [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	c.JSON(http.StatusAccepted, GetProfileResponse{
 		Content: "private data",

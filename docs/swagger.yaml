@@ -1,0 +1,229 @@
+basePath: /api/v1
+definitions:
+  handlers.GetProfileResponse:
+    properties:
+      content:
+        example: private data!
+        type: string
+      user_id:
+        example: 142
+        type: integer
+    type: object
+  handlers.GetUsersResponse:
+    properties:
+      page:
+        example: 1
+        type: integer
+      page_count:
+        example: 50
+        type: integer
+      page_size:
+        example: 10
+        type: integer
+      result_count:
+        example: 30
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  handlers.OAuthRequest:
+    properties:
+      otp:
+        example: ""
+        maxLength: 4
+        type: string
+      phone_number:
+        example: "09012345678"
+        maxLength: 11
+        minLength: 10
+        type: string
+    required:
+    - phone_number
+    type: object
+  handlers.OAuthResponse:
+    properties:
+      message:
+        example: success!
+        type: string
+      token:
+        example: <JWT_TOKEN>
+        type: string
+    type: object
+  models.User:
+    properties:
+      id:
+        type: integer
+      phone_number:
+        type: string
+      registered_at:
+        type: string
+    type: object
+  utils.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: page not found
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A simple OTP implementation written in go
+  title: GO OTP
+  version: "1.0"
+paths:
+  /profile/info:
+    get:
+      description: Returns a user's id with a message using a JWT token
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetProfileResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      summary: Get private user data
+      tags:
+      - Users
+  /users:
+    get:
+      description: Returns a list of users with pagination and filtering capabilities
+      parameters:
+      - description: Sets the current page
+        in: query
+        name: page
+        type: integer
+      - description: Elements per page
+        in: query
+        name: page_size
+        type: integer
+      - description: Search for user(s) with phone number
+        in: query
+        name: phone_number
+        type: string
+      - description: Set the starting registration date (yyyy-mm-dd)
+        example: "2025-09-05"
+        in: query
+        name: date_from
+        type: string
+      - description: Set the ending registration date (yyyy-mm-dd)
+        example: "2025-09-06"
+        in: query
+        name: date_to
+        type: string
+      - description: Parse dates in the desired timezone
+        example: Asia/Tehran
+        in: query
+        name: tz
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetUsersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      summary: Get a list of users
+      tags:
+      - Users
+  /users/{id}:
+    get:
+      description: Returns a single user by using it's id as a path argument
+      parameters:
+      - description: ID of the user
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      summary: Get user by ID
+      tags:
+      - Users
+  /users/oauth:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Register/Login using phone number and receive an OTP.
+
+        Flow:
+        1. Send a phone number in the request body
+        2. Receive an OTP in the console
+        3. Validate the OTP to register the user or login if it already exists (A JWT token will be given in both cases)
+
+        Restrictions:
+        * Phone number must be unique (for registration)
+        * OTP is valid for 2 minutes
+        * You can make 3 requests every 10 minutes
+      parameters:
+      - description: Request data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.OAuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.OAuthResponse'
+        "202":
+          description: Accepted
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      summary: OTP based Register & Login
+      tags:
+      - Users
+swagger: "2.0"

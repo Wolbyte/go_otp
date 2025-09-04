@@ -57,6 +57,29 @@ func OTPCleanup() {
 	}
 }
 
+// @Summary	OTP based Register & Login
+// @Description Register/Login using phone number and receive an OTP.
+// @Description
+// @Description Flow:
+// @Description 1. Send a phone number in the request body
+// @Description 2. Receive an OTP in the console
+// @Description 3. Validate the OTP to register the user or login if it already exists (A JWT token will be given in both cases)
+// @Description
+// @Description Restrictions:
+// @Description * Phone number must be unique (for registration)
+// @Description * OTP is valid for 2 minutes
+// @Description * You can make 3 requests every 10 minutes
+// @Tags Users
+// @Accept  json
+// @Produce json
+// @Param request body OAuthRequest true "Request data"
+// @Success 202
+// @Success 200 {object} OAuthResponse
+// @Failure 400 {object} utils.HTTPError
+// @Failure 401 {object} utils.HTTPError
+// @Failure 429 {object} utils.HTTPError
+// @Failure 500 {object} utils.HTTPError
+// @Router /users/oauth [post]
 func (h *OAuthHandler) OAuth(c *gin.Context) {
 	go OTPCleanup()
 
