@@ -65,6 +65,8 @@ func ParseDateRange(dateFrom, dateTo, tz string) (time.Time, time.Time, error) {
 func ValidatePhoneNumber(number string) (string, bool) {
 	isValid := true
 
+	number = strings.ReplaceAll(number, " ", "")
+
 	if number == "" {
 		return "", false
 	}
