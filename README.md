@@ -106,6 +106,10 @@ limiting can be reused across multiple endpoints.
 > [!CAUTION]
 > If you set `GIN_MODE=release`, the swagger docs will not be hosted as a security measure
 
+This project uses [swag](https://github.com/swaggo/swag) to automatically generate documentation from annotations in the code.
+
+If you apply any changes to the docs you can re-build them again with `swag init` (follow the upstream installation instructions)
+
 Interactive Swagger documentation with examples is available at: 
 
     http://localhost:8080/swagger/index.html
