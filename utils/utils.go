@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -15,15 +16,14 @@ func GenerateOTPCode() string {
 func ValidatePhoneNumber(number string) (string, bool) {
 	isValid := true
 
-	if number[0:3] == "+98" {
-		number = number[3:]
+	if number == "" {
+		return "", false
 	}
 
-	if number[0] == '0' {
-		number = number[1:]
-	}
+	number = strings.TrimPrefix(number, "+98")
+	number = strings.TrimPrefix(number, "0")
 
-	if number[0] != '9' {
+	if strings.Index(number, "9") != 0 {
 		isValid = false
 	}
 
