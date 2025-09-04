@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +17,7 @@ func Register(router *gin.Engine, db *gorm.DB) {
 		oauthHandler := handlers.NewOAuthHandler(db)
 
 		apiV1.GET("/users/:id", userHandler.GetUser)
-		apiV1.POST("/users/oauth", oauthHandler.OAuth)
+		apiV1.POST("/users/oauth", middleware.RateLimitOTP(3, 10*time.Minute), oauthHandler.OAuth)
 
 		profileApi := apiV1.Group("/profile")
 		profileApi.Use(middleware.AuthRequired())

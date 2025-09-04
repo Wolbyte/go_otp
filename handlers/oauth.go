@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/wolbyte/go_otp/models"
 	"github.com/wolbyte/go_otp/utils"
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ type OAuthHandler struct {
 }
 
 type OAuthRequest struct {
-	PhoneNumber string `json:"phoneNumber" binding:"required,min=10,max=11"`
+	PhoneNumber string `json:"phone_number" binding:"required,min=10,max=11"`
 	OTPCode     string `json:"otp" binding:"max=4"`
 }
 
@@ -55,8 +56,9 @@ func (h *OAuthHandler) OAuth(c *gin.Context) {
 
 	var req OAuthRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		return
 	}
 
 	validatedNumber, isValidNumber := utils.ValidatePhoneNumber(req.PhoneNumber)
