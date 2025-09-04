@@ -13,10 +13,6 @@ type UserHandler struct {
 	DB *gorm.DB
 }
 
-type RegisterRequest struct {
-	PhoneNumber string `json:"phoneNumber" binding:"required,min=10,max=11"`
-}
-
 func NewUserHandler(db *gorm.DB) *UserHandler {
 	return &UserHandler{DB: db}
 }
