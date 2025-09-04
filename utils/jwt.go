@@ -6,8 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// TODO: use env variable
-var jwtSecret = []byte("SuperSecretJWTString")
+var jwtSecret = []byte(GetenvDefault("JWT_SECRET", "SuperSecretJWTString"))
 
 type JWTClaims struct {
 	UserID uint `json:"user_id"`

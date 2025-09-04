@@ -31,7 +31,8 @@ func NewOAuthHandler(db *gorm.DB) *OAuthHandler {
 	return &OAuthHandler{DB: db}
 }
 
-// Use in-memory storage for OTPs to reduce load on database
+// Use in-memory storage for OTPs to reduce load on the main database
+// Redis should be used as a proper implementation
 var (
 	otpStore = make(map[string]*OTPData)
 	otpMutex sync.Mutex

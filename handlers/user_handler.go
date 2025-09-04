@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -86,8 +85,6 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	if phoneNumber != "" {
 		dbQuery.Where("phone_number = ?", phoneNumber)
 	}
-
-	fmt.Println(from, to)
 
 	if !from.IsZero() && !to.IsZero() {
 		dbQuery = dbQuery.Where("registered_at BETWEEN ? AND ?", from, to)

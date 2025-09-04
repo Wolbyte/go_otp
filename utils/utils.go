@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 )
@@ -11,6 +12,16 @@ func GenerateOTPCode() string {
 	code := fmt.Sprintf("%04d", rand.Intn(10000))
 	fmt.Println("Generated a new OTP:", code)
 	return code
+}
+
+func GetenvDefault(variable string, defaultValue string) string {
+	result := os.Getenv(variable)
+
+	if result == "" {
+		result = defaultValue
+	}
+
+	return result
 }
 
 func Clamp(n int, min int, max int) int {
