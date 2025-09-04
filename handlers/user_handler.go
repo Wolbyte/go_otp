@@ -38,9 +38,9 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 	// Return user (exclude password for security)
 	c.JSON(http.StatusOK, gin.H{
-		"id":          user.ID,
-		"phoneNumber": user.PhoneNumber,
-		"created":     user.CreatedAt,
+		"id":            user.ID,
+		"phone_number":  user.PhoneNumber,
+		"registered_at": user.RegisteredAt,
 	})
 }
 
