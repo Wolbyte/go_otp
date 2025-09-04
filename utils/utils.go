@@ -13,6 +13,44 @@ func GenerateOTPCode() string {
 	return code
 }
 
+func Clamp(n int, min int, max int) int {
+	if n > max {
+		n = max
+	} else if n < min {
+		n = min
+	}
+
+	return n
+}
+
+func ParseDateRange(dateFrom, dateTo, tz string) (time.Time, time.Time, error) {
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		loc = time.UTC
+	}
+
+	var from, to time.Time
+
+	if dateFrom != "" {
+		t, err := time.ParseInLocation("2006-01-02", dateFrom, loc)
+		if err != nil {
+			return from, to, err
+		}
+		from = t.In(time.UTC) // convert to UTC
+	}
+
+	if dateTo != "" {
+		t, err := time.ParseInLocation("2006-01-02", dateTo, loc)
+		if err != nil {
+			return from, to, err
+		}
+		// end of day in user timezone, then convert to UTC
+		to = t.AddDate(0, 0, 1).Add(-time.Nanosecond).In(time.UTC)
+	}
+
+	return from, to, nil
+}
+
 func ValidatePhoneNumber(number string) (string, bool) {
 	isValid := true
 

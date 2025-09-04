@@ -16,6 +16,7 @@ func Register(router *gin.Engine, db *gorm.DB) {
 		userHandler := handlers.NewUserHandler(db)
 		oauthHandler := handlers.NewOAuthHandler(db)
 
+		apiV1.GET("/users", userHandler.GetUsers)
 		apiV1.GET("/users/:id", userHandler.GetUser)
 		apiV1.POST("/users/oauth", middleware.RateLimitOTP(3, 10*time.Minute), oauthHandler.OAuth)
 
