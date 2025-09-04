@@ -1,3 +1,8 @@
+// @title			GO OTP
+// @version		1.0
+// @description	A simple OTP implementation written in go
+// @host			localhost:8080
+// @BasePath		/api/v1
 package main
 
 import (
