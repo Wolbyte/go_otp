@@ -14,7 +14,7 @@ func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "missing or invalid token"})
+			utils.NewHttpError(c, http.StatusUnauthorized, "missing or invalid token")
 			c.Abort()
 			return
 		}
@@ -22,7 +22,7 @@ func AuthRequired() gin.HandlerFunc {
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 		claims, err := utils.ParseJWT(tokenStr)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
+			utils.NewHttpError(c, http.StatusUnauthorized, "invalid token or expired token")
 			c.Abort()
 			return
 		}
