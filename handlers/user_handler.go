@@ -15,6 +15,19 @@ type UserHandler struct {
 	DB *gorm.DB
 }
 
+type GetUsersResponse struct {
+	Users       []models.User `json:"users"`
+	Page        int           `json:"page" example:"1"`
+	PageSize    int           `json:"page_size" example:"10"`
+	ResultCount int64         `json:"result_count" example:"30"`
+	PageCount   int           `json:"page_count" example:"50"`
+}
+
+type GetProfileResponse struct {
+	Content string `json:"content" example:"private data!"`
+	UserID  uint   `json:"user_id" example:"142"`
+}
+
 func NewUserHandler(db *gorm.DB) *UserHandler {
 	return &UserHandler{DB: db}
 }
@@ -23,7 +36,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid user id"})
+		utils.NewHttpError(c, http.StatusBadRequest, "invalid user id")
 		return
 	}
 
@@ -31,19 +44,14 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	var user models.User
 	if err := h.DB.First(&user, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			utils.NewHttpError(c, http.StatusNotFound, "user does not exist")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch user"})
+		utils.NewHttpError(c, http.StatusInternalServerError, "failed to fetch user")
 		return
 	}
 
-	// Return user (exclude password for security)
-	c.JSON(http.StatusOK, gin.H{
-		"id":            user.ID,
-		"phone_number":  user.PhoneNumber,
-		"registered_at": user.RegisteredAt,
-	})
+	c.JSON(http.StatusOK, user)
 }
 
 func (h *UserHandler) GetUsers(c *gin.Context) {
@@ -76,7 +84,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 
 	from, to, err := utils.ParseDateRange(dateFrom, dateTo, timezone)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date"})
+		utils.NewHttpError(c, http.StatusBadRequest, "invalid date")
 		return
 	}
 
@@ -104,16 +112,18 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":          users,
-		"page":          page,
-		"page_size":     pageSize,
-		"total_results": total,
-		"total_pages":   int(math.Ceil(float64(total) / float64(pageSize))),
+	c.JSON(http.StatusOK, GetUsersResponse{
+		Users:       users,
+		Page:        page,
+		PageSize:    pageSize,
+		ResultCount: total,
+		PageCount:   int(math.Ceil(float64(total) / float64(pageSize))),
 	})
 }
 
 func (h *UserHandler) GetProfile(c *gin.Context) {
-	userID := c.GetUint("user_id")
-	c.JSON(http.StatusAccepted, gin.H{"message": "private data", "user_id": userID})
+	c.JSON(http.StatusAccepted, GetProfileResponse{
+		Content: "private data",
+		UserID:  c.GetUint("user_id"),
+	})
 }

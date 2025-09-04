@@ -18,8 +18,13 @@ type OAuthHandler struct {
 }
 
 type OAuthRequest struct {
-	PhoneNumber string `json:"phone_number" binding:"required,min=10,max=11"`
-	OTPCode     string `json:"otp" binding:"max=4"`
+	PhoneNumber string `json:"phone_number" binding:"required,min=10,max=11" example:"09012345678"`
+	OTPCode     string `json:"otp" binding:"max=4" example:""`
+}
+
+type OAuthResponse struct {
+	Message string `json:"message" example:"success!"`
+	Token   string `json:"token" example:"<JWT_TOKEN>"`
 }
 
 type OTPData struct {
@@ -58,7 +63,7 @@ func (h *OAuthHandler) OAuth(c *gin.Context) {
 	var req OAuthRequest
 
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		utils.NewHttpError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -66,19 +71,19 @@ func (h *OAuthHandler) OAuth(c *gin.Context) {
 	req.PhoneNumber = validatedNumber
 
 	if !isValidNumber {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid number"})
+		utils.NewHttpError(c, http.StatusBadRequest, "invalid number")
 		return
 	}
 
 	if req.PhoneNumber != "" && req.OTPCode == "" {
 		otpStore[req.PhoneNumber] = &OTPData{code: utils.GenerateOTPCode(), expiary: utils.GenerateExpiary(2)}
-		c.JSON(http.StatusContinue, gin.H{})
+		c.JSON(http.StatusAccepted, gin.H{})
 		return
 	}
 
 	if req.PhoneNumber != "" && req.OTPCode != "" {
 		if otpStore[req.PhoneNumber] == nil || otpStore[req.PhoneNumber].code != req.OTPCode {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid otp"})
+			utils.NewHttpError(c, http.StatusUnauthorized, "invalid otp")
 			return
 		}
 
@@ -93,7 +98,7 @@ func (h *OAuthHandler) OAuth(c *gin.Context) {
 			user.PhoneNumber = req.PhoneNumber
 
 			if err := h.DB.Create(&user).Error; err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				utils.NewHttpError(c, http.StatusInternalServerError, err.Error())
 				return
 			}
 		}
@@ -101,13 +106,13 @@ func (h *OAuthHandler) OAuth(c *gin.Context) {
 		token, err := utils.GenerateJWT(user.ID)
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("token generation failed: %s", err)})
+			utils.NewHttpError(c, http.StatusInternalServerError, fmt.Sprintf("token generation failed: %s", err.Error()))
 			return
 		}
 
-		c.JSON(http.StatusAccepted, gin.H{
-			"message": "success!",
-			"token":   token,
+		c.JSON(http.StatusOK, OAuthResponse{
+			Message: "success!",
+			Token:   token,
 		})
 	}
 }
