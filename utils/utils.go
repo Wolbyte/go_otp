@@ -1,17 +1,19 @@
 package utils
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"os"
 	"strings"
 	"time"
 )
 
 func GenerateOTPCode() string {
-	code := fmt.Sprintf("%04d", rand.Intn(10000))
-	fmt.Println("Generated a new OTP:", code)
-	return code
+	// rand.Int does not return an error when using rand.Reader
+	code, _ := rand.Int(rand.Reader, big.NewInt(10000))
+	fmt.Println("Generated a new OTP:", code.String())
+	return code.String()
 }
 
 func GetenvDefault(variable string, defaultValue string) string {
